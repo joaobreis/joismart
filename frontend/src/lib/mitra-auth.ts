@@ -48,6 +48,11 @@ function configureSdk(session: MitraSession): void {
   });
 }
 
+// Sem sessão: SDK só com a URL, para as funções públicas da vitrine.
+export function configurePublic(): void {
+  configureSdkMitra({ baseURL: import.meta.env.VITE_MITRA_BASE_URL, projectId: PROJECT_ID, authUrl: AUTH_URL });
+}
+
 // ── Init ──
 
 // Tenta configurar o SDK automaticamente.

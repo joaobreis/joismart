@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   loginWithGoogleMitra,
-  loginWithMicrosoftMitra,
   emailLoginMitra,
   emailSignupMitra,
   emailVerifyCodeMitra,
@@ -16,6 +15,8 @@ import { initMitra, saveSession } from '../lib/mitra-auth';
 import { Card, CardContent } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import Logo from '../components/site/Logo';
+import { definirLogado } from '../lib/sessao';
 
 const AUTH_URL = import.meta.env.VITE_MITRA_AUTH_URL;
 const PROJECT_ID = Number(import.meta.env.VITE_MITRA_PROJECT_ID);
@@ -25,6 +26,10 @@ type View = 'main' | 'verify' | 'forgot-email' | 'forgot-code' | 'forgot-newpass
 
 export default function LoginPage({ onLogin }: { onLogin: () => void }) {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const voltaBruta = params.get('volta') || '/';
+  const volta = voltaBruta.startsWith('/') && !voltaBruta.startsWith('//') && !voltaBruta.startsWith('/login') ? voltaBruta : '/';
+  const [aviso, setAviso] = useState('');
 
   // State
   const [view, setView] = useState<View>('main');
@@ -46,18 +51,18 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
     // O login pelo popup deixa a SDK configurada sem onTokenRefresh/onSessionExpired: ela renovaria
     // so em memoria e o localStorage ficaria com o token antigo. Reconfigura a partir da sessao salva.
     initMitra();
+    definirLogado(true);
     onLogin();
-    navigate('/', { replace: true });
+    navigate(volta, { replace: true });
   }
 
   // ── SSO (popup) ──
 
-  async function handleSso(provider: 'google' | 'microsoft') {
+  async function handleSso(provider: 'google') {
     setLoading(provider);
     setError('');
     try {
-      const fn = provider === 'google' ? loginWithGoogleMitra : loginWithMicrosoftMitra;
-      const response = await fn(loginOpts);
+      const response = await loginWithGoogleMitra(loginOpts);
       handleSuccess(response);
     } catch (err: any) {
       setError(err?.message || 'Falha no login. Tente novamente.');
@@ -210,21 +215,22 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
   // ── Render ──
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--color-bg)' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-4 hero-fundo">
+      <Link to="/" aria-label="Voltar para a loja"><Logo tamanho={36} /></Link>
       <Card className="w-full max-w-sm animate-scaleIn">
         <CardContent className="pt-8 pb-6 px-6">
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text)' }}>
+            <h1 className="text-xl font-semibold" style={{ color: 'var(--fg)' }}>
               {view === 'verify' || view === 'forgot-code'
                 ? 'Verifique seu email'
                 : view === 'forgot-email'
                   ? 'Recuperar senha'
                   : view === 'forgot-newpassword'
                     ? 'Nova senha'
-                    : isCreate ? 'Criar conta' : 'Entrar'}
+                    : isCreate ? 'Criar conta' : 'Entrar na JoiSmart'}
             </h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-sm mt-1" style={{ color: 'var(--fg-muted)' }}>
               {view === 'verify' || view === 'forgot-code'
                 ? `Enviamos um código para ${email}`
                 : view === 'forgot-email'
@@ -233,7 +239,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
                     ? 'Escolha uma nova senha para sua conta'
                     : isCreate
                       ? 'Preencha os dados para criar sua conta'
-                      : 'Escolha como deseja acessar'}
+                      : 'Para fechar o pedido e acompanhar a entrega'}
             </p>
           </div>
 
@@ -259,7 +265,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
                 onClick={handleResendCode}
                 disabled={loading !== null}
                 className="text-sm font-medium cursor-pointer border-0 bg-transparent disabled:opacity-50"
-                style={{ color: 'var(--color-primary)' }}
+                style={{ color: 'var(--accent)' }}
               >
                 {loading === 'resend' ? 'Enviando...' : 'Reenviar código'}
               </button>
@@ -287,7 +293,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
                 onClick={backToLogin}
                 disabled={loading !== null}
                 className="text-sm cursor-pointer border-0 bg-transparent disabled:opacity-50"
-                style={{ color: 'var(--color-text-secondary)' }}
+                style={{ color: 'var(--fg-muted)' }}
               >
                 ← Voltar para login
               </button>
@@ -314,7 +320,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
                 onClick={handleSendResetCode}
                 disabled={loading !== null}
                 className="text-sm font-medium cursor-pointer border-0 bg-transparent disabled:opacity-50"
-                style={{ color: 'var(--color-primary)' }}
+                style={{ color: 'var(--accent)' }}
               >
                 {loading === 'forgot-send' ? 'Enviando...' : 'Reenviar código'}
               </button>
@@ -323,7 +329,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
                 onClick={backToLogin}
                 disabled={loading !== null}
                 className="text-sm cursor-pointer border-0 bg-transparent disabled:opacity-50"
-                style={{ color: 'var(--color-text-secondary)' }}
+                style={{ color: 'var(--fg-muted)' }}
               >
                 ← Voltar para login
               </button>
@@ -361,7 +367,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
                 onClick={backToLogin}
                 disabled={loading !== null}
                 className="text-sm cursor-pointer border-0 bg-transparent disabled:opacity-50"
-                style={{ color: 'var(--color-text-secondary)' }}
+                style={{ color: 'var(--fg-muted)' }}
               >
                 ← Voltar para login
               </button>
@@ -380,23 +386,25 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
                 {loading === 'google' ? 'Aguarde...' : 'Continue com Google'}
               </Button>
 
-              <Button variant="secondary" size="lg" className="w-full" onClick={() => handleSso('microsoft')} disabled={loading !== null}>
-                <svg width="18" height="18" viewBox="0 0 24 24">
-                  <rect x="1" y="1" width="10" height="10" fill="#F25022" />
-                  <rect x="13" y="1" width="10" height="10" fill="#7FBA00" />
-                  <rect x="1" y="13" width="10" height="10" fill="#00A4EF" />
-                  <rect x="13" y="13" width="10" height="10" fill="#FFB900" />
-                </svg>
-                {loading === 'microsoft' ? 'Aguarde...' : 'Continue com Microsoft'}
-              </Button>
+<div className="grid grid-cols-2 gap-3">
+                <Button variant="secondary" size="lg" className="w-full" onClick={() => setAviso('O login com Facebook está em modo de teste e chega em breve. Por enquanto, entre com Google ou e-mail.')} disabled={loading !== null}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07" /></svg>
+                  Facebook
+                </Button>
+                <Button variant="secondary" size="lg" className="w-full" onClick={() => setAviso('O login com Apple está em modo de teste e chega em breve. Por enquanto, entre com Google ou e-mail.')} disabled={loading !== null}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 1.43c0 1.14-.42 2.2-1.25 3.17-1 1.17-2.2 1.84-3.5 1.74a3.5 3.5 0 0 1-.03-.43c0-1.1.48-2.27 1.33-3.24.42-.49.96-.9 1.61-1.22.65-.32 1.27-.5 1.85-.53.01.17.02.34.02.51zm4.6 16.3c-.35.81-.77 1.56-1.25 2.25-.66.94-1.2 1.6-1.61 1.95-.65.6-1.35.9-2.09.92-.53 0-1.17-.15-1.92-.46-.75-.3-1.44-.46-2.07-.46-.66 0-1.37.16-2.13.46-.76.31-1.37.47-1.84.49-.71.03-1.42-.28-2.13-.95-.45-.4-1.02-1.08-1.7-2.04-.73-1.03-1.33-2.22-1.8-3.58C.03 14.84-.22 13.4-.22 12c0-1.6.35-2.99 1.04-4.15a6.1 6.1 0 0 1 2.18-2.2 5.86 5.86 0 0 1 2.94-.84c.58 0 1.34.18 2.28.53.94.35 1.54.53 1.8.53.2 0 .87-.21 2-.62 1.07-.39 1.98-.55 2.72-.48 2 .16 3.51.95 4.5 2.38-1.8 1.09-2.68 2.61-2.66 4.56.02 1.52.57 2.79 1.65 3.8.49.46 1.04.82 1.65 1.08-.13.38-.27.75-.42 1.1z" /></svg>
+                  Apple
+                </Button>
+              </div>
+              {aviso && <p className="text-[12.5px] text-center" style={{ color: 'var(--warning-text)' }}>{aviso}</p>}
 
               {/* Divider */}
               <div className="flex items-center gap-3 my-2">
-                <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-border)' }} />
-                <span className="text-xs whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
+                <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border)' }} />
+                <span className="text-xs whitespace-nowrap" style={{ color: 'var(--fg-muted)' }}>
                   {isCreate ? 'Ou crie com e-mail' : 'Ou entre com e-mail'}
                 </span>
-                <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-border)' }} />
+                <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border)' }} />
               </div>
 
               {/* Email form */}
@@ -443,7 +451,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
                   onClick={goToForgot}
                   disabled={loading !== null}
                   className="text-sm cursor-pointer border-0 bg-transparent disabled:opacity-50"
-                  style={{ color: 'var(--color-primary)' }}
+                  style={{ color: 'var(--accent)' }}
                 >
                   Esqueci minha senha
                 </button>
@@ -453,11 +461,11 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
               <button
                 onClick={() => { setIsCreate(!isCreate); setError(''); setSuccess(''); }}
                 className="text-sm cursor-pointer border-0 bg-transparent mt-1"
-                style={{ color: 'var(--color-text-secondary)' }}
+                style={{ color: 'var(--fg-muted)' }}
               >
                 {isCreate
-                  ? <>Já tem conta? <span className="font-medium underline" style={{ color: 'var(--color-primary)' }}>Entre aqui</span></>
-                  : <>Não tem conta? <span className="font-medium underline" style={{ color: 'var(--color-primary)' }}>Crie a sua aqui</span></>}
+                  ? <>Já tem conta? <span className="font-medium underline" style={{ color: 'var(--accent)' }}>Entre aqui</span></>
+                  : <>Não tem conta? <span className="font-medium underline" style={{ color: 'var(--accent)' }}>Crie a sua aqui</span></>}
               </button>
             </div>
           )}
@@ -471,6 +479,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
           )}
         </CardContent>
       </Card>
+      <Link to="/" className="text-[13px]" style={{ color: 'var(--fg-muted)' }}>← Voltar para a loja</Link>
     </div>
   );
 }

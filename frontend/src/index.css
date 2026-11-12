@@ -41,7 +41,7 @@
   --fg-disabled: #b3b1bc;
   --fg-inverted: #ffffff;
 
-  --brand: #4b5563;
+  --brand: #138a42;
   --accent: var(--brand);
   --accent-hover: color-mix(in srgb, var(--brand) 88%, black);
   --accent-soft: color-mix(in srgb, var(--brand) 8%, transparent);
@@ -103,10 +103,10 @@
   --fg-disabled: #484d53;
   --fg-inverted: #0b0c0e;
 
-  --brand: #a0a7b0;
+  --brand: #21c25e;
   --accent: var(--brand);
   /* Marca clara no escuro: o texto sobre ela e' a tinta escura, nao branco */
-  --accent-fg: #0b0c0e;
+  --accent-fg: #06140b;
   --accent-hover: color-mix(in srgb, var(--brand) 80%, white);
   --accent-soft: color-mix(in srgb, var(--brand) 14%, transparent);
   --accent-soft-hover: color-mix(in srgb, var(--brand) 20%, transparent);
@@ -566,4 +566,78 @@ tr:hover .celula-inline-seta,
 .recharts-pie-sector path {
   stroke: none !important;
   stroke-width: 0 !important;
+}
+
+
+/* ═══ JoiSmart — vitrine (desvios pedidos pela loja: titulos grossos, plaquinhas animadas) ═══ */
+@layer components {
+  .fonte-logo { font-family: "Nunito", "Geist", ui-sans-serif, system-ui, sans-serif; }
+  .vitrine-titulo {
+    font-weight: 800; letter-spacing: -0.03em; line-height: 0.98; text-transform: uppercase;
+    font-size: clamp(34px, 7vw, 68px); color: var(--fg);
+  }
+  .vitrine-sub { font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; font-size: clamp(26px, 4.4vw, 42px); color: var(--fg); }
+  .texto-marca { color: var(--accent); }
+  .hero-fundo {
+    background:
+      radial-gradient(80% 60% at 75% 30%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 70%),
+      radial-gradient(60% 50% at 10% 90%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+      var(--bg);
+  }
+  .secao-verde { background: color-mix(in srgb, var(--accent) 7%, var(--bg)); }
+  .faixa-promo { background: var(--accent); color: var(--accent-fg); overflow: hidden; white-space: nowrap; }
+  .faixa-promo-trilho { display: inline-flex; gap: 40px; padding: 12px 0; animation: faixa-rola 28s linear infinite; font-weight: 800; letter-spacing: .08em; font-size: 13px; text-transform: uppercase; }
+  @keyframes faixa-rola { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .placa-img { filter: drop-shadow(0 24px 40px rgb(0 0 0 / .55)); user-select: none; -webkit-user-drag: none; }
+  .placa-flutua { animation: placa-flutua 6s ease-in-out infinite; }
+  @keyframes placa-flutua {
+    0%, 100% { transform: translateY(0) rotate(var(--giro, 0deg)); }
+    50% { transform: translateY(-14px) rotate(calc(var(--giro, 0deg) + 2deg)); }
+  }
+  .placa-hover { transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+  .placa-hover:hover { transform: translateY(-6px) rotate(-3deg) scale(1.04); }
+  .revelar { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+  .revelar.visivel { opacity: 1; transform: none; }
+  .botao-vitrine {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 52px; padding: 0 28px;
+    border-radius: 14px; background: var(--accent); color: var(--accent-fg); font-weight: 800; letter-spacing: .04em;
+    text-transform: uppercase; font-size: 14px; transition: background-color .15s, transform .15s; box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  .botao-vitrine:hover { background: var(--accent-hover); }
+  .botao-vitrine:active { transform: scale(.98); }
+  .botao-vitrine-sec {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 52px; padding: 0 24px;
+    border-radius: 14px; border: 1px solid var(--border-strong); color: var(--fg); font-weight: 700; font-size: 14px;
+    background: color-mix(in srgb, var(--bg-elevated) 70%, transparent); transition: border-color .15s, background-color .15s;
+  }
+  .botao-vitrine-sec:hover { border-color: var(--accent-border); background: var(--surface-hover); }
+  .whats-flutuante {
+    position: fixed; right: 18px; bottom: 18px; z-index: 60; width: 58px; height: 58px; border-radius: 9999px;
+    display: inline-flex; align-items: center; justify-content: center; background: var(--accent); color: var(--accent-fg);
+    box-shadow: var(--shadow-pop); transition: transform .2s;
+  }
+  .whats-flutuante:hover { transform: scale(1.07); }
+  .whats-flutuante::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid var(--accent);
+    animation: whats-pulso 2.2s ease-out infinite;
+  }
+  @keyframes whats-pulso { from { transform: scale(1); opacity: .7; } to { transform: scale(1.55); opacity: 0; } }
+  .topo-vidro { background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+  .contador { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9999px; background: var(--accent); color: var(--accent-fg); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .passo-num { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; background: var(--accent-soft); color: var(--accent); font-weight: 800; }
+  .mapa-caixa { height: 420px; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); isolation: isolate; }
+  .mapa-ponto { width: 18px; height: 18px; border-radius: 9999px; background: var(--accent); border: 3px solid var(--bg); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .mapa-ponto-teste { background: var(--warning); box-shadow: 0 0 0 4px color-mix(in srgb, var(--warning) 35%, transparent); }
+  .leaflet-container { background: var(--bg-sunken); font-family: inherit; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--bg-elevated); color: var(--fg); box-shadow: var(--shadow-pop); }
+  .leaflet-container a.leaflet-popup-close-button { color: var(--fg-subtle); }
+  .leaflet-control-attribution { background: color-mix(in srgb, var(--bg) 80%, transparent) !important; color: var(--fg-subtle) !important; }
+  .leaflet-control-attribution a { color: var(--fg-muted) !important; }
+  .leaflet-bar a { background: var(--bg-elevated); color: var(--fg); border-color: var(--border); }
+  .leaflet-bar a:hover { background: var(--surface-hover); }
+  .qr-teste { background-image: repeating-conic-gradient(var(--fg) 0 25%, var(--bg-elevated) 0 50%); background-size: 18px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .placa-flutua, .faixa-promo-trilho, .whats-flutuante::after { animation: none; }
+  .revelar { opacity: 1; transform: none; transition: none; }
 }
