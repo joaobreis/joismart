@@ -16,8 +16,8 @@ export default function MapaClientes({ pontos, altura = 420, aoClicarMapa }: { p
   useEffect(() => {
     if (!caixa.current || mapa.current) return;
     const m = L.map(caixa.current, { scrollWheelZoom: false, zoomControl: true }).setView([-26.3045, -48.8487], 12);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19,
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap', maxZoom: 19, className: 'mapa-tiles',
     }).addTo(m);
     m.on('click', (e: L.LeafletMouseEvent) => clique.current?.(e.latlng.lat, e.latlng.lng));
     camada.current = L.layerGroup().addTo(m);
